@@ -1,8 +1,8 @@
 import { FileSearch } from "lucide-react";
-import { DocumentUpload } from "./DocumentUpload";
+import { DocumentMultiUpload } from "./DocumentMultiUpload";
 
 interface EmptyStateProps {
-	onUpload: (file: File) => void;
+	onUpload: (files: File[]) => void;
 	uploading?: boolean;
 }
 
@@ -13,13 +13,13 @@ export function EmptyState({ onUpload, uploading }: EmptyStateProps) {
 				<FileSearch className="h-7 w-7 text-white" />
 			</div>
 			<h2 className="mb-2 text-lg font-semibold text-neutral-800">
-				Upload a document to get started
+				Upload documents to get started
 			</h2>
 			<p className="mb-8 max-w-sm text-center text-sm text-neutral-500">
 				Ask questions about leases, title reports, contracts, and other legal
 				documents
 			</p>
-			<DocumentUpload onUpload={onUpload} uploading={uploading} />
+			<DocumentMultiUpload onUpload={onUpload} uploading={uploading} />
 		</div>
 	);
 }

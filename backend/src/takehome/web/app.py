@@ -7,8 +7,11 @@ from contextlib import asynccontextmanager
 import structlog
 from alembic import command
 from alembic.config import Config
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from takehome.common.errors import NotFoundError, ValidationError
 
 logger = structlog.get_logger()
 
@@ -33,6 +36,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(NotFoundError)
+async def handle_not_found_error(_: Request, exc: NotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(ValidationError)
+async def handle_validation_error(_: Request, exc: ValidationError) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
 
 from takehome.web.routers import conversations, documents, messages  # noqa: E402
 

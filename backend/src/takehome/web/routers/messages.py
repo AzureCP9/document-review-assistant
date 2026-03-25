@@ -5,16 +5,17 @@ from collections.abc import AsyncIterator
 from datetime import datetime
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import StreamingResponse
 
+from takehome.common.errors import NotFoundError
 from takehome.db.models import Message
 from takehome.db.session import get_session
 from takehome.services.conversation import get_conversation, update_conversation
-from takehome.services.document import get_document_for_conversation
+from takehome.services.document import get_documents_for_conversation
 from takehome.services.llm import chat_with_document, count_sources_cited, generate_title
 
 logger = structlog.get_logger()
@@ -59,7 +60,7 @@ async def list_messages(
     # Verify the conversation exists
     conversation = await get_conversation(session, conversation_id)
     if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise NotFoundError("Conversation not found")
 
     stmt = (
         select(Message)
@@ -92,7 +93,7 @@ async def send_message(
     # Verify the conversation exists
     conversation = await get_conversation(session, conversation_id)
     if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise NotFoundError("Conversation not found")
 
     # Save the user message
     user_message = Message(
@@ -106,9 +107,16 @@ async def send_message(
 
     logger.info("User message saved", conversation_id=conversation_id, message_id=user_message.id)
 
-    # Load document text for the conversation
-    document = await get_document_for_conversation(session, conversation_id)
-    document_text: str | None = document.extracted_text if document else None
+    documents = await get_documents_for_conversation(session, conversation_id)
+    document_context = "\n\n".join(
+        (
+            f'<document name="{document.filename}">\n'
+            f"{document.extracted_text}\n"
+            "</document>"
+        )
+        for document in documents
+        if document.extracted_text
+    ) or None
 
     # Load conversation history (exclude the message we just saved, it will be the user_message param)
     stmt = (
@@ -135,7 +143,7 @@ async def send_message(
         try:
             async for chunk in chat_with_document(
                 user_message=body.content,
-                document_text=document_text,
+                document_text=document_context,
                 conversation_history=conversation_history,
             ):
                 full_response += chunk

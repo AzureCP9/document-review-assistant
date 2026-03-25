@@ -9,6 +9,7 @@ from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from takehome.common.errors import ValidationError
 from takehome.config import settings
 from takehome.db.models import Document
 
@@ -23,25 +24,20 @@ async def upload_document(
     Validates the file is a PDF, saves it to disk, extracts text using PyMuPDF,
     and stores metadata in the database.
 
-    Raises ValueError if the conversation already has a document or the file is not a PDF.
+    Raises ValidationError if the file is invalid.
     """
-    # Check if conversation already has a document
-    existing = await get_document_for_conversation(session, conversation_id)
-    if existing is not None:
-        raise ValueError("Conversation already has a document. Only one document per conversation is allowed.")
-
     # Validate file type
     if file.content_type not in ("application/pdf", "application/x-pdf"):
         filename = file.filename or ""
         if not filename.lower().endswith(".pdf"):
-            raise ValueError("Only PDF files are supported.")
+            raise ValidationError("Only PDF files are supported.")
 
     # Read file content
     content = await file.read()
 
     # Validate file size
     if len(content) > settings.max_upload_size:
-        raise ValueError(
+        raise ValidationError(
             f"File too large. Maximum size is {settings.max_upload_size // (1024 * 1024)}MB."
         )
 
@@ -112,3 +108,16 @@ async def get_document_for_conversation(
     stmt = select(Document).where(Document.conversation_id == conversation_id)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_documents_for_conversation(
+    session: AsyncSession, conversation_id: str
+) -> list[Document]:
+    """List documents for a conversation ordered by upload time."""
+    stmt = (
+        select(Document)
+        .where(Document.conversation_id == conversation_id)
+        .order_by(Document.uploaded_at.asc())
+    )
+    result = await session.execute(stmt)
+    return list(result.scalars().all())

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from takehome.common.errors import NotFoundError
 from takehome.db.session import get_session
 from takehome.services.conversation import (
     create_conversation,
@@ -28,7 +29,7 @@ class ConversationListItem(BaseModel):
     title: str
     created_at: datetime
     updated_at: datetime
-    has_document: bool
+    document_count: int
 
     model_config = {"from_attributes": True}
 
@@ -38,8 +39,8 @@ class ConversationDetail(BaseModel):
     title: str
     created_at: datetime
     updated_at: datetime
-    has_document: bool
-    document: DocumentInfo | None = None
+    document_count: int
+    documents: list[DocumentInfo]
 
     model_config = {"from_attributes": True}
 
@@ -78,7 +79,7 @@ async def list_conversations_endpoint(
             title=c.title,
             created_at=c.created_at,
             updated_at=c.updated_at,
-            has_document=len(c.documents) > 0,
+            document_count=len(c.documents),
         )
         for c in conversations
     ]
@@ -95,8 +96,8 @@ async def create_conversation_endpoint(
         title=conversation.title,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
-        has_document=False,
-        document=None,
+        document_count=0,
+        documents=[],
     )
 
 
@@ -108,25 +109,24 @@ async def get_conversation_endpoint(
     """Get a single conversation with its document info."""
     conversation = await get_conversation(session, conversation_id)
     if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise NotFoundError("Conversation not found")
 
-    doc_info: DocumentInfo | None = None
-    if conversation.documents:
-        doc = conversation.documents[0]
-        doc_info = DocumentInfo(
+    documents = [
+        DocumentInfo(
             id=doc.id,
             filename=doc.filename,
             page_count=doc.page_count,
             uploaded_at=doc.uploaded_at,
         )
-
+        for doc in conversation.documents
+    ]
     return ConversationDetail(
         id=conversation.id,
         title=conversation.title,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
-        has_document=doc_info is not None,
-        document=doc_info,
+        document_count=len(documents),
+        documents=documents,
     )
 
 
@@ -139,25 +139,24 @@ async def update_conversation_endpoint(
     """Update a conversation's title."""
     conversation = await update_conversation(session, conversation_id, body.title)
     if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise NotFoundError("Conversation not found")
 
-    doc_info: DocumentInfo | None = None
-    if conversation.documents:
-        doc = conversation.documents[0]
-        doc_info = DocumentInfo(
+    documents = [
+        DocumentInfo(
             id=doc.id,
             filename=doc.filename,
             page_count=doc.page_count,
             uploaded_at=doc.uploaded_at,
         )
-
+        for doc in conversation.documents
+    ]
     return ConversationDetail(
         id=conversation.id,
         title=conversation.title,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
-        has_document=doc_info is not None,
-        document=doc_info,
+        document_count=len(documents),
+        documents=documents,
     )
 
 
@@ -169,4 +168,4 @@ async def delete_conversation_endpoint(
     """Delete a conversation and all associated data."""
     deleted = await delete_conversation(session, conversation_id)
     if not deleted:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+        raise NotFoundError("Conversation not found")
