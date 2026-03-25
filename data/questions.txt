@@ -1,0 +1,28 @@
+Lease questions
+“What is the lease term?”
+“Are there renewal options?”
+“Can the tenant assign or sublet?”
+“Who handles repairs, maintenance, taxes, insurance, CAM?”
+“What default/termination rights exist?”
+
+Title questions
+“Are there easements, liens, encumbrances, or restrictions?”
+“Are there survey/title discrepancies?”
+“Anything that affects intended use or access?”
+
+Environmental questions
+“Are there recognized environmental conditions?”
+“Any contamination risk?”
+“What follow-up is required after the Phase I?”
+“Who bears remediation responsibility?”
+
+Cross-document comparison questions
+“Do the lease and amendment conflict?”
+“Do the title report and survey line up?”
+“What documents mention assignment restrictions?”
+“Summarize environmental risk across all uploaded docs.”
+
+Risk/summary questions
+“What are the top diligence risks?”
+“What issues could delay closing?”
+“What should counsel review manually?”
