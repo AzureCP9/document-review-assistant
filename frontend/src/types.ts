@@ -12,7 +12,21 @@ export interface Message {
 	role: "user" | "assistant" | "system";
 	content: string;
 	sources_cited: number;
+	citations: Citation[];
 	created_at: string;
+}
+
+export interface Citation {
+	document_name: string;
+	page_number: number;
+	section_or_clause?: string | null;
+	key_phrase: string;
+}
+
+export interface DocumentSearchMatch {
+	page_number: number;
+	snippet: string;
+	occurrence_index: number;
 }
 
 export interface Document {

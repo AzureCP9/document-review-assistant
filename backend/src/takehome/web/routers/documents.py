@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 import structlog
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, Query, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import FileResponse
@@ -12,7 +12,11 @@ from starlette.responses import FileResponse
 from takehome.common.errors import NotFoundError
 from takehome.db.session import get_session
 from takehome.services.conversation import get_conversation
-from takehome.services.document import get_document, upload_document
+from takehome.services.document import (
+    get_document,
+    search_document_text,
+    upload_document,
+)
 
 logger = structlog.get_logger()
 
@@ -32,6 +36,12 @@ class DocumentOut(BaseModel):
     uploaded_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class DocumentSearchMatchOut(BaseModel):
+    page_number: int
+    snippet: str
+    occurrence_index: int
 
 
 # --------------------------------------------------------------------------- #
@@ -91,3 +101,28 @@ async def serve_document_file(
         filename=document.filename,
         media_type="application/pdf",
     )
+
+
+@router.get(
+    "/api/documents/{document_id}/search",
+    response_model=list[DocumentSearchMatchOut],
+)
+async def search_document_endpoint(
+    document_id: str,
+    q: str = Query(min_length=2),
+    session: AsyncSession = Depends(get_session),
+) -> list[DocumentSearchMatchOut]:
+    """Search extracted text within a document."""
+    document = await get_document(session, document_id)
+    if document is None:
+        raise NotFoundError("Document not found")
+
+    matches = search_document_text(document, q)
+    return [
+        DocumentSearchMatchOut(
+            page_number=match.page_number,
+            snippet=match.snippet,
+            occurrence_index=match.occurrence_index,
+        )
+        for match in matches
+    ]

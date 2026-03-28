@@ -132,3 +132,30 @@ body {
 	background-color: #f5f5f5;
 	font-weight: 600;
 }
+
+.react-pdf__Page__textContent .pdf-search-highlight {
+	display: inline;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	outline: 0;
+	box-shadow: none;
+	border-radius: 2px;
+	background: #ffd2bf;
+	color: #c94c16;
+	font: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	font-style: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	vertical-align: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+	font-kerning: inherit;
+	font-variant: inherit;
+	word-spacing: inherit;
+	white-space: inherit;
+	transform: none;
+	text-shadow: none;
+}

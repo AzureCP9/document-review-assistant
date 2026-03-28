@@ -2,6 +2,7 @@ import type {
 	Conversation,
 	ConversationDetail,
 	Document,
+	DocumentSearchMatch,
 	Message,
 } from "../types";
 
@@ -84,4 +85,13 @@ export async function uploadDocument(
 
 export function getDocumentUrl(documentId: string): string {
 	return `${BASE}/documents/${documentId}/content`;
+}
+
+export async function searchDocument(
+	documentId: string,
+	query: string,
+): Promise<DocumentSearchMatch[]> {
+	const params = new URLSearchParams({ q: query });
+	const res = await fetch(`${BASE}/documents/${documentId}/search?${params.toString()}`);
+	return handleResponse<DocumentSearchMatch[]>(res);
 }

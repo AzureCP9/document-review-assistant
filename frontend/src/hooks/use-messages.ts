@@ -8,6 +8,7 @@ export function useMessages(conversationId: string | null) {
 	const [error, setError] = useState<string | null>(null);
 	const [streaming, setStreaming] = useState(false);
 	const [streamingContent, setStreamingContent] = useState("");
+	const [finalizing, setFinalizing] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 
 	const refresh = useCallback(async () => {
@@ -46,12 +47,14 @@ export function useMessages(conversationId: string | null) {
 				role: "user",
 				content,
 				sources_cited: 0,
+				citations: [],
 				created_at: new Date().toISOString(),
 			};
 
 			setMessages((prev) => [...prev, userMessage]);
 			setStreaming(true);
 			setStreamingContent("");
+			setFinalizing(false);
 			setError(null);
 
 			try {
@@ -87,6 +90,7 @@ export function useMessages(conversationId: string | null) {
 								type?: string;
 								content?: string;
 								delta?: string;
+								finalizing?: boolean;
 								message?: Message;
 							};
 
@@ -100,6 +104,9 @@ export function useMessages(conversationId: string | null) {
 								// Final message from server
 								setMessages((prev) => [...prev, parsed.message as Message]);
 								accumulated = "";
+								setFinalizing(false);
+							} else if (parsed.type === "finalizing") {
+								setFinalizing(true);
 							} else if (parsed.content && !parsed.type) {
 								// Fallback: plain content field
 								accumulated += parsed.content;
@@ -120,6 +127,7 @@ export function useMessages(conversationId: string | null) {
 						role: "assistant",
 						content: accumulated,
 						sources_cited: 0,
+						citations: [],
 						created_at: new Date().toISOString(),
 					};
 					setMessages((prev) => [...prev, assistantMessage]);
@@ -134,6 +142,7 @@ export function useMessages(conversationId: string | null) {
 			} finally {
 				setStreaming(false);
 				setStreamingContent("");
+				setFinalizing(false);
 			}
 		},
 		[conversationId, streaming],
@@ -145,6 +154,7 @@ export function useMessages(conversationId: string | null) {
 		error,
 		streaming,
 		streamingContent,
+		finalizing,
 		send,
 		refresh,
 	};

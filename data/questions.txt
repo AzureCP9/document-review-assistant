@@ -26,3 +26,8 @@ Risk/summary questions
 “What are the top diligence risks?”
 “What issues could delay closing?”
 “What should counsel review manually?”
+
+Questions with no source to check against
+What is the tenant's guarantor?
+How many parking spaces are included with the lease?
+What is the cap on the seller's indemnity liability in the title report?
