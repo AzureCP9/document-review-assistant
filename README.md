@@ -1,16 +1,10 @@
-# Orbital — Product Engineering Take-Home
+# Document Review Assistant
 
 ## Demo
 
 Walkthrough: [https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea](https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea)
 
-Welcome! This is a take-home assessment for a Product Engineering role at Orbital.
-
-You've been given a working baseline application: a document Q&A tool for commercial real estate lawyers. Users upload legal documents (leases, title reports, environmental assessments) and ask questions about them. The AI assistant answers questions grounded in the document content.
-
-The app works, but it has limitations. Your job is to extend it.
-
----
+This project extends the baseline legal document Q&A app into a multi-document review workflow for commercial real estate due diligence. Conversations can now contain multiple documents, answers can cite and group sources across those documents, and the document viewer supports faster verification through direct citation navigation and improved in-document search.
 
 ## Setup
 
