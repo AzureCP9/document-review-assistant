@@ -6,6 +6,8 @@ Walkthrough: [https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea](https
 
 This project extends the baseline legal document Q&A app into a multi-document review workflow for commercial real estate due diligence. Conversations can now contain multiple documents, answers can cite and group sources across those documents, and the document viewer supports faster verification through direct citation navigation and improved in-document search.
 
+Part 2 rationale: see [DECISIONS.md](DECISIONS.md).
+
 ## Setup
 
 ### Prerequisites
@@ -32,8 +34,6 @@ This copies `.env.example` to `.env` and builds the Docker images.
 ```
 ANTHROPIC_API_KEY=your_key_here
 ```
-
-We've provided an API key in the task email. You can also use your own.
 
 4. Start everything:
 
