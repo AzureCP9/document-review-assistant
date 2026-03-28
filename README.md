@@ -2,7 +2,7 @@
 
 ## Demo
 
-[Watch the Loom walkthrough](https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea)
+Walkthrough: [https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea](https://www.loom.com/share/678f13c85e4b422eb059942f98e7a9ea)
 
 Welcome! This is a take-home assessment for a Product Engineering role at Orbital.
 
